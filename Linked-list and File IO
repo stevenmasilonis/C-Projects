@@ -1,0 +1,145 @@
+
+
+Page
+4
+of 4
+/*
+Author: Steven Masilonis
+Date Created: March 22, 2023
+CSE 2451
+Purpose: creating methods that can create a linked list using a push function and
+prints them out as well as searching for maximum and minimum in list. Also can do
+this using a file stream.
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+struct node {
+  char name[50];
+  double grade;
+  struct node* next;
+};
+//function prototypes
+struct node* create_node(char *name, double grade);
+struct node* push_data(char *name, double grade, struct node* list);
+void print_list(struct node *list);
+void delete_list(struct node* list);
+void print_file(char *filename);
+double max_grade(struct node *list);
+double min_grade(struct node *list);
+struct node *file_to_list(char *filename);
+int main() {
+  //test linked-list functions
+  struct node *head = create_node("Tom", 93.5);
+  head = push_data("Adam", 79.8, head);
+  head = push_data("Nick", 99.7, head);
+  //print linked list
+  print_list(head);
+  double MaxGrade = max_grade(head), MinGrade = min_grade(head);
+  printf("max grade in list: %.1lf\nmin grade in list: %.1lf\n", MaxGrade,
+  MinGrade);
+  //delete linked list
+  delete_list(head);
+  head = NULL;
+  //print file
+  char filename[] = "input.txt";
+  print_file(filename);
+  //file to list
+  head = file_to_list(filename); //reuse head pointer
+  print_list(head);
+  delete_list(head);
+  return 0;
+}
+struct node* create_node(char *name, double grade) {
+  struct node *cNode = malloc(sizeof *cNode); //reserves memory for the
+  size of this struct
+    if (cNode != NULL) { //need to make sure memory allocation works
+      strcpy((*cNode).name, name); //assigns character array by using strcpy
+      (*cNode).grade = grade; //assigns grade
+      (*cNode).next = NULL; //want to point at NULL
+  }
+    else {
+      printf("memory allocation fail\n");
+      abort();
+}
+  return cNode;
+}
+struct node* push_data(char *name, double grade, struct node* list) {
+  char temp[50];
+  strcpy(temp, name); //need to create a temp variable to hold our string cannot be a pointer
+  struct node *cNode = create_node(temp, grade); //calls create_node to create a memory allocated node for us
+  (*cNode).next = list; //we wants this node to point at whatever initial node was in list
+  return cNode;
+  }
+  void print_list(struct node* list) {
+    if (list == NULL) { //if null/empty list
+      printf("empty list\n");
+  }
+    else { //means we have atleast one element in our list
+      if ((*list).next != NULL) { //as long our next node is not null loop iterates
+      printf("(%s, %.1f)->", (*list).name, (*list).grade);
+      //printing data in said node
+      print_list((*list).next); //recursively calling next items in our list until end
+  }
+  else {
+    printf("(%s, %.1f)->", (*list).name, (*list).grade); //printing data in last node since condition makes us stop at tlast node before NULL
+    printf("NULL\n"); //when loop ends we reach our NULL value and print this
+    }
+  }
+}
+void delete_list(struct node* list) {
+  if (list != NULL) { //need our nodes to not b null to free
+    delete_list((*list).next); //recursively accesses our last element, frees it and works back to the front
+    free(list);
+  }
+}
+double max_grade(struct node *list) {
+  int max = (*list).grade; //setting max to our first element in list
+  if ((*list).next != NULL) { //while the next node of list is not NULL
+    int test = max_grade((*list).next); //uses recursion to return the max value of the last two nodes working all the way back to the front and so on
+    if (test > max) { //simple max testing algorithm, returns the bigger one
+    max = test;
+  }
+}
+return max;
+}
+  double min_grade(struct node *list) {
+  int min = (*list).grade; //setting min to our first element in list
+  if ((*list).next != NULL) { //while the next node of list is not NULL
+    int test = min_grade((*list).next); //uses same logic as
+    max_grade (just now everything is for smaller values)
+    if (min > test) {
+      min = test;
+    }
+  }
+  return min;
+}
+void print_file(char *filename) {
+  FILE *file = fopen(filename, "r"); //open our file
+  double grade; //declare variables for fscan
+  char name[50];
+  if (file == NULL) { //need to check input file if it is empty
+    printf("fopen failure\n");
+    abort();
+  }
+  while (fscanf(file, "%s %lf" , name, &grade) == 2) { //check rest of file
+    printf("(%s %.1f)\n", name, grade); //print each line of input
+    }
+  fclose(file); //close input file
+}
+struct node *file_to_list(char *filename) {
+  FILE *file = fopen(filename, "r"); //open our file
+  double grade; //declare variables for fscan
+  char name[50];
+  if (file == NULL) { //need to check input file if it is empty
+    printf("fopen failure\n");
+    abort();
+  }
+  fscanf(file, "%s %lf" , name, &grade);//need to read 1st line to create head of node
+  struct node *cNode = create_node(name, grade);
+  while (fscanf(file, "%s %lf" , name, &grade) == 2) { //get rest of our data and push it
+    cNode = push_data(name, grade, cNode);
+  }
+  fclose(file); //close input file
+  return cNode;
+}
