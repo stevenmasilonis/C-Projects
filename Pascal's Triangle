@@ -1,0 +1,80 @@
+
+
+
+/*
+Author: Steven Masilonis
+Date Created: 2/9/2023
+Class: CSE 2451 SP23
+Lab 1
+Purpose: Outputs elements in a user selected row of a Pascal's Triangle.
+*/
+#include <stdio.h>
+#include <stdlib.h>
+void print_array(int *arr, int size); //prints out array
+int* getRow_iterative(int rowIndex , int *returnSize); //gets selected pascal row
+iteratively
+int* getRow_recursive(int rowIndex, int *returnSize); //gets selected pascal row
+recursively
+int main()
+  {
+  int rowIndex; //main function was given to us
+  printf("input rowIndex: ");
+  scanf("%d", &rowIndex);
+  int size;
+  int *arr = getRow_iterative(rowIndex, &size);
+  print_array(arr, size);
+  free(arr);
+  arr = NULL;
+  arr = getRow_recursive(rowIndex, &size);
+  print_array(arr, size);
+  free(arr);
+  arr = NULL;
+  return 0;
+}
+void print_array(int *arr, int size) {
+  printf("{");//initial bracket outside loop
+  for (int i = 0; i < size; i++) {
+    if (i != size - 1) { //do not want comma afte last element
+      printf("%d ,", arr[i]);
+    }
+    else {
+      printf("%d}\n", arr[i]); //finishing bracket, no need for commas
+    }
+  }
+}
+int* getRow_iterative(int rowIndex , int *returnSize) {
+  double n = rowIndex; //n and r used for readability in the equation
+  *returnSize = n + 1; //size will always be 1 more than row #
+  int *arr = malloc(sizeof(*arr) * *returnSize); //reserves memory for array
+  arr[0] = 1; //first element always 1
+  for (int r = 1; r < *returnSize; r++) {
+    //r++; //cycling through array
+    arr[r] = arr[r - 1] * ((n - r + 1) / r); //given formula
+  }
+  return arr;
+}
+int* getRow_recursive(int rowIndex, int *returnSize) {
+  *returnSize = rowIndex + 1;
+  int* current_row = malloc(sizeof(*current_row) * (*returnSize));//reserve mem
+  if (rowIndex == 0) {
+    current_row[0] = 1; //set current row to {1}
+    }
+  else if (rowIndex == 1) {
+    current_row[0] = 1; //set current row to {1, 1}
+    current_row[1] = 1;
+  }
+  else {
+    current_row[0] = 1; //1st element always 1
+    int previousSize;//variable needed to call getRow recursive again
+    int *previous_row = getRow_recursive(rowIndex - 1, &previousSize);
+    int i = 1;//starting at 1 because element 0 already declared
+    while (i < rowIndex) { //iterates before last index is used
+      int sum = previous_row[i] + previous_row[i - 1];//uses previous row
+      current_row[i] = sum; //for current row next index
+      i++;
+    }
+    current_row[rowIndex] = 1; //last element always 1
+    free(previous_row);//used to free up memory
+  }
+  return current_row;
+}
